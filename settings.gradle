@@ -1,2 +1,4 @@
+include ':autoadapter-processor'
+include ':autoadapter-annotations'
 include ':app'
 rootProject.name = "AutoAdapter"
