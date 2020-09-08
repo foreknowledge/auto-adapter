@@ -7,22 +7,15 @@ import java.io.File
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
-import javax.annotation.processing.SupportedOptions
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 
-@SupportedOptions(AutoAdapterProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
 class AutoAdapterProcessor : AbstractProcessor() {
-
-    companion object {
-        const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
-    }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
-    override fun getSupportedAnnotationTypes(): MutableSet<String>
-            = mutableSetOf(AdapterItem::class.java.canonicalName)
+    override fun getSupportedAnnotationTypes() = mutableSetOf(AdapterItem::class.java.canonicalName)
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         val kaptKotlinGeneratedDir =
@@ -47,17 +40,17 @@ class AutoAdapterProcessor : AbstractProcessor() {
         val annotation = e.getAnnotation(AdapterItem::class.java)
         val layoutId = annotation.layoutId
         val viewHolderBindingDataList = e.enclosedElements.mapNotNull {
-            val viewHolderBinding = it.getAnnotation(ViewBinding::class.java)
-            if (viewHolderBinding != null) {
-                val elementName = it.simpleName.toString()
-                val fieldName = elementName.substring(3, elementName.indexOf("$"))
-                    .toLowerCase(Locale.ROOT)
-                ViewBindingData(fieldName, viewHolderBinding.viewId)
-            } else {
-                null
+            it.getAnnotation(ViewBinding::class.java)?.let { viewBinding ->
+                val elementName = it.simpleName.toString()  // getXXX$annotation 형태
+                val fieldName = elementName.substring(3, elementName.indexOf("$")).toLowerCase(Locale.ROOT)
+                ViewBindingData(fieldName, viewBinding.viewId)
             }
         }
 
         return ItemData(packageName, itemName, layoutId, viewHolderBindingDataList)
+    }
+
+    companion object {
+        const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
 }
