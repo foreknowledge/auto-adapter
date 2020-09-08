@@ -11,10 +11,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val recyclerView: RecyclerView = findViewById(R.id.personList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = PersonRecyclerAdapter(listOf(
-            Person("Big Bird", "123 Seasame Street"),
-            Person("Kermit the Frog", "6801 Hollywood Blvd.")
-        ))
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = PersonRecyclerAdapter(listOf(
+                Person("Big Bird", "123 Seasame Street"),
+                Person("Kermit the Frog", "6801 Hollywood Blvd.")
+            ))
+        }
     }
 }
