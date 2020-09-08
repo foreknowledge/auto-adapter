@@ -1,6 +1,6 @@
 package com.ellie.autoadapter_processor
 
-import com.ellie.autoadapter_annotations.AdapterModel
+import com.ellie.autoadapter_annotations.AdapterItem
 import com.ellie.autoadapter_annotations.ViewBinding
 import com.squareup.kotlinpoet.FileSpec
 import java.io.File
@@ -22,16 +22,16 @@ class AutoAdapterProcessor : AbstractProcessor() {
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
     override fun getSupportedAnnotationTypes(): MutableSet<String>
-            = mutableSetOf(AdapterModel::class.java.canonicalName)
+            = mutableSetOf(AdapterItem::class.java.canonicalName)
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         val kaptKotlinGeneratedDir =
             processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME] ?: return false
 
-        roundEnv.getElementsAnnotatedWith(AdapterModel::class.java)
+        roundEnv.getElementsAnnotatedWith(AdapterItem::class.java)
             .forEach {
                 val modelData = getModelData(it)
-                val fileName = "${modelData.modelName}RecyclerAdapter"
+                val fileName = "${modelData.itemName}RecyclerAdapter"
                 FileSpec.builder(modelData.packageName, fileName)
                     .addType(AdapterCodeBuilder(fileName, modelData).build())
                     .build()
@@ -41,10 +41,10 @@ class AutoAdapterProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun getModelData(e: Element): ModelData {
+    private fun getModelData(e: Element): ItemData {
         val packageName = processingEnv.elementUtils.getPackageOf(e).toString()
         val modelName = e.simpleName.toString()
-        val annotation = e.getAnnotation(AdapterModel::class.java)
+        val annotation = e.getAnnotation(AdapterItem::class.java)
         val layoutId = annotation.layoutId
         val viewHolderBindingData = e.enclosedElements.mapNotNull {
             val viewHolderBinding = it.getAnnotation(ViewBinding::class.java)
@@ -58,6 +58,6 @@ class AutoAdapterProcessor : AbstractProcessor() {
             }
         }
 
-        return ModelData(packageName, modelName, layoutId, viewHolderBindingData)
+        return ItemData(packageName, modelName, layoutId, viewHolderBindingData)
     }
 }

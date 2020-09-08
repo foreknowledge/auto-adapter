@@ -5,12 +5,12 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 class AdapterCodeBuilder (
     private val adapterName: String,
-    private val data: ModelData
+    private val data: ItemData
 ) {
     private val viewHolderName = "ViewHolder"
     private val viewHolderClassName = ClassName(data.packageName, viewHolderName)
     private val viewHolderQualifiedClassName = ClassName(data.packageName, "$adapterName.$viewHolderName")
-    private val modelClassName = ClassName(data.packageName, data.modelName)
+    private val modelClassName = ClassName(data.packageName, data.itemName)
     private val itemListClassName = ClassName("kotlin.collections", "List").parameterizedBy(modelClassName)
     private val textViewClassName = ClassName("android.widget", "TextView")
 
@@ -79,7 +79,7 @@ class AdapterCodeBuilder (
         FunSpec.builder("bind")
             .addParameter("item", modelClassName)
             .apply {
-                data.viewBindingData.forEach {
+                data.viewBindingDataList.forEach {
                     addProperty(PropertySpec.builder("${it.fieldName}View", textViewClassName, KModifier.PRIVATE)
                         .initializer("itemView.findViewById(%L)", it.viewId)
                         .build())
