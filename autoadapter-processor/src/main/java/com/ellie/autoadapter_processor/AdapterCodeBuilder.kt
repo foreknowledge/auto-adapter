@@ -5,20 +5,20 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 class AdapterCodeBuilder (
     private val adapterName: String,
-    private val data: ItemData
+    private val itemData: ItemData
 ) {
     private val viewHolderName = "ViewHolder"
-    private val viewHolderClassName = ClassName(data.packageName, viewHolderName)
-    private val viewHolderQualifiedClassName = ClassName(data.packageName, "$adapterName.$viewHolderName")
-    private val modelClassName = ClassName(data.packageName, data.itemName)
+    private val viewHolderClassName = ClassName(itemData.packageName, viewHolderName)
+    private val viewHolderQualifiedClassName = ClassName(itemData.packageName, "$adapterName.$viewHolderName")
+    private val modelClassName = ClassName(itemData.packageName, itemData.itemName)
     private val itemListClassName = ClassName("kotlin.collections", "List").parameterizedBy(modelClassName)
     private val textViewClassName = ClassName("android.widget", "TextView")
 
     fun build(): TypeSpec = TypeSpec.classBuilder(adapterName)
         .primaryConstructor(
             FunSpec.constructorBuilder()
-            .addParameter("items", itemListClassName)
-            .build()
+                .addParameter("items", itemListClassName)
+                .build()
         )
         .superclass(ClassName("androidx.recyclerview.widget.RecyclerView", "Adapter")
             .parameterizedBy(viewHolderQualifiedClassName)
@@ -46,7 +46,7 @@ class AdapterCodeBuilder (
             .returns(viewHolderQualifiedClassName)
             .addStatement("val view = " +
                     "android.view.LayoutInflater.from(parent.context).inflate(%L, " +
-                    "parent, false)", data.layoutId)
+                    "parent, false)", itemData.layoutId)
             .addStatement("return $viewHolderName(view)")
             .build()
         )
@@ -79,7 +79,7 @@ class AdapterCodeBuilder (
         FunSpec.builder("bind")
             .addParameter("item", modelClassName)
             .apply {
-                data.viewBindingDataList.forEach {
+                itemData.viewBindingDataList.forEach {
                     addProperty(PropertySpec.builder("${it.fieldName}View", textViewClassName, KModifier.PRIVATE)
                         .initializer("itemView.findViewById(%L)", it.viewId)
                         .build())
