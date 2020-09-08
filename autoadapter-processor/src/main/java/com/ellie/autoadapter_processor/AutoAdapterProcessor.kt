@@ -30,10 +30,10 @@ class AutoAdapterProcessor : AbstractProcessor() {
 
         roundEnv.getElementsAnnotatedWith(AdapterItem::class.java)
             .forEach {
-                val modelData = getModelData(it)
-                val fileName = "${modelData.itemName}RecyclerAdapter"
-                FileSpec.builder(modelData.packageName, fileName)
-                    .addType(AdapterCodeBuilder(fileName, modelData).build())
+                val itemData = getItemData(it)
+                val fileName = "${itemData.itemName}RecyclerAdapter"
+                FileSpec.builder(itemData.packageName, fileName)
+                    .addType(AdapterCodeBuilder(fileName, itemData).build())
                     .build()
                     .writeTo(File(kaptKotlinGeneratedDir))
             }
@@ -41,12 +41,12 @@ class AutoAdapterProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun getModelData(e: Element): ItemData {
+    private fun getItemData(e: Element): ItemData {
         val packageName = processingEnv.elementUtils.getPackageOf(e).toString()
-        val modelName = e.simpleName.toString()
+        val itemName = e.simpleName.toString()
         val annotation = e.getAnnotation(AdapterItem::class.java)
         val layoutId = annotation.layoutId
-        val viewHolderBindingData = e.enclosedElements.mapNotNull {
+        val viewHolderBindingDataList = e.enclosedElements.mapNotNull {
             val viewHolderBinding = it.getAnnotation(ViewBinding::class.java)
             if (viewHolderBinding != null) {
                 val elementName = it.simpleName.toString()
@@ -58,6 +58,6 @@ class AutoAdapterProcessor : AbstractProcessor() {
             }
         }
 
-        return ItemData(packageName, modelName, layoutId, viewHolderBindingData)
+        return ItemData(packageName, itemName, layoutId, viewHolderBindingDataList)
     }
 }
